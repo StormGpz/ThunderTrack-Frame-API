@@ -21,6 +21,25 @@ app.get('/api/test', (req, res) => {
 app.get('/api/frame/diary', (req, res) => {
   const { pair = 'Unknown', pnl = '0', strategy = 'Unknown', sentiment = 'Unknown' } = req.query;
   
+  // 构建Mini App embed JSON - 跳转到具体日记详情页
+  const diaryId = req.query.id || `${pair}-${Date.now()}`; // 生成或使用传入的日记ID
+  const miniAppEmbed = {
+    version: "1",
+    imageUrl: `${req.protocol}://${req.get('host')}/api/frame/image?pair=${encodeURIComponent(pair)}&pnl=${pnl}&strategy=${encodeURIComponent(strategy)}&sentiment=${encodeURIComponent(sentiment)}`,
+    button: {
+      title: "查看详情",
+      action: {
+        type: "launch_miniapp",
+        url: `https://thundertrack-miniapp.vercel.app/diary/${diaryId}?pair=${encodeURIComponent(pair)}&pnl=${pnl}&strategy=${encodeURIComponent(strategy)}&sentiment=${encodeURIComponent(sentiment)}`,
+        name: "ThunderTrack",
+        splashImageUrl: "https://thundertrack-miniapp.vercel.app/icons/Icon-192.png",
+        splashBackgroundColor: "#1a1a2e"
+      }
+    }
+  };
+  
+  const miniAppEmbedString = JSON.stringify(miniAppEmbed);
+  
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -28,13 +47,10 @@ app.get('/api/frame/diary', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ThunderTrack 交易复盘 - ${pair}</title>
     
-    <!-- Frame Protocol Meta Tags -->
-    <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${req.protocol}://${req.get('host')}/api/frame/image?pair=${encodeURIComponent(pair)}&pnl=${pnl}&strategy=${encodeURIComponent(strategy)}&sentiment=${encodeURIComponent(sentiment)}" />
-    <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
-    <meta property="fc:frame:button:1" content="查看详情" />
-    <meta property="fc:frame:button:1:action" content="link" />
-    <meta property="fc:frame:button:1:target" content="https://thundertrack-miniapp.vercel.app" />
+    <!-- Mini App embed meta tags -->
+    <meta name="fc:miniapp" content='${miniAppEmbedString}' />
+    <!-- For backward compatibility -->
+    <meta name="fc:frame" content='${miniAppEmbedString}' />
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="ThunderTrack 交易复盘 - ${pair}" />
