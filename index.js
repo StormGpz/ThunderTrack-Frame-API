@@ -30,11 +30,21 @@ app.get('/api/frame/diary', (req, res) => {
       title: "查看详情",
       action: {
         type: "launch_miniapp",
-        url: `https://thundertrack-miniapp.vercel.app/diary/${diaryId}?pair=${encodeURIComponent(pair)}&pnl=${pnl}&strategy=${encodeURIComponent(strategy)}&sentiment=${encodeURIComponent(sentiment)}`,
+        // 确保使用正确的Mini App URL，不包含子路径
+        url: "https://thundertrack-miniapp.vercel.app",
+        // 通过postMessage传递参数而不是URL参数
         name: "ThunderTrack",
         splashImageUrl: "https://thundertrack-miniapp.vercel.app/icons/Icon-192.png",
         splashBackgroundColor: "#1a1a2e"
       }
+    },
+    // 添加数据传递
+    metadata: {
+      diaryId: diaryId,
+      pair: pair,
+      pnl: pnl,
+      strategy: strategy,
+      sentiment: sentiment
     }
   };
   
